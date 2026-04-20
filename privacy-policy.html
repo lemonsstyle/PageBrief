@@ -435,12 +435,12 @@
         <div class="summary" data-lang="zh">
           <span class="summary-pill">仅在用户主动操作后处理网页内容</span>
           <span class="summary-pill">不经过开发者自有服务器</span>
-          <span class="summary-pill">配置仅在手动保存后写入本地</span>
+          <span class="summary-pill">API Key 会加密后再写入本地</span>
         </div>
         <div class="summary" data-lang="en" hidden>
           <span class="summary-pill">Only processes page content after an explicit action</span>
           <span class="summary-pill">No developer-owned relay server</span>
-          <span class="summary-pill">Settings are stored locally only after save</span>
+          <span class="summary-pill">API keys are encrypted before local storage</span>
         </div>
       </section>
 
@@ -514,6 +514,7 @@
             <ul data-lang="zh">
               <li>最近摘要与调试日志保存在当前浏览器的本地扩展存储中。</li>
               <li>模型配置仅会在用户点击保存配置后写入当前浏览器本地，以便下次继续使用。</li>
+              <li>其中 API Key 会先在扩展本地加密，再保存到浏览器本地扩展存储中，不以明文形式落盘。</li>
               <li>读取当前网页内容，仅用于生成摘要。</li>
               <li>保存模型配置，仅用于减少重复输入；保存最近摘要与调试日志，仅用于提升使用体验与排查错误。</li>
               <li>开发者不会自动接收这些本地存储内容。</li>
@@ -521,6 +522,7 @@
             <ul data-lang="en" hidden>
               <li>Recent summaries and debug logs are stored in the browser's local extension storage.</li>
               <li>Model settings are written locally only after the user clicks Save Configuration, so they can be reused later.</li>
+              <li>The API key is encrypted inside the extension before it is written to local extension storage, and is not stored in plaintext on disk.</li>
               <li>Page content is read only for the purpose of generating a summary.</li>
               <li>Model settings reduce repeated input, while recent summaries and debug logs improve usability and troubleshooting.</li>
               <li>The developer does not automatically receive any of this locally stored information.</li>
