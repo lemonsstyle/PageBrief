@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PageBrief</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero">
+        <div class="hero-top">
+          <div class="hero-title">
+            <h1>PageBrief</h1>
+            <div class="hero-meta">
+              <span id="presetBadge" class="meta-pill">OpenAI</span>
+              <span id="modelBadge" class="meta-pill meta-pill-soft">gpt-4.1-mini</span>
+              <span id="lengthBadge" class="meta-pill meta-pill-soft">60 字</span>
+            </div>
+          </div>
+
+          <div id="utilityWrap" class="utility-wrap">
+            <button
+              id="toggleUtilityButton"
+              class="icon-button"
+              type="button"
+              aria-label="打开工具面板"
+              title="工具"
+            >
+              &#9881;
+            </button>
+
+            <section id="utilityPanel" class="utility-panel" aria-hidden="true">
+              <label class="field">
+                <div class="range-head">
+                  <span>目标长度</span>
+                  <strong id="summaryLimitValue">60 字</strong>
+                </div>
+                <input id="summaryLimit" type="range" min="60" max="150" step="10" value="60">
+              </label>
+
+              <div class="utility-head">
+                <h2>调试日志</h2>
+                <div class="utility-actions">
+                  <button id="copyLogsButton" class="ghost-button" type="button">复制日志</button>
+                  <button
+                    id="clearLogsButton"
+                    class="danger-icon-button"
+                    type="button"
+                    aria-label="清空日志"
+                    title="清空日志"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M9 3.75h6a1.5 1.5 0 0 1 1.5 1.5V6h3a.75.75 0 0 1 0 1.5h-1.06l-.72 10.11A2.25 2.25 0 0 1 15.47 19.5H8.53a2.25 2.25 0 0 1-2.25-1.89L5.56 7.5H4.5a.75.75 0 0 1 0-1.5h3v-.75A1.5 1.5 0 0 1 9 3.75Zm6 .75H9V6h6v-1.5Zm-6.47 13.5h6.94a.75.75 0 0 0 .75-.63L16.93 7.5H7.07l.71 9.87a.75.75 0 0 0 .75.63ZM10.5 9.75a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5a.75.75 0 0 1 .75-.75Zm3 0a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5a.75.75 0 0 1 .75-.75Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <pre id="debugLog" class="debug-log">暂无日志。</pre>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel summary-panel">
+        <div class="section-head">
+          <h2>摘要</h2>
+          <button id="copySummaryButton" class="ghost-button" type="button" disabled>复制</button>
+        </div>
+        <div id="summary" class="summary empty">点击“总结当前页”生成结果。</div>
+      </section>
+
+      <button id="summarizeButton" class="primary primary-action" type="button">总结当前页</button>
+      <p id="statusBar" class="status-bar is-hidden"></p>
+
+      <section id="settingsPanel" class="panel config-panel is-collapsed">
+        <button
+          id="toggleSettingsButton"
+          class="config-toggle"
+          type="button"
+          aria-expanded="false"
+        >
+          <span class="config-text">
+            <span class="config-label">模型配置</span>
+            <span id="configSummary" class="config-summary">OpenAI · gpt-4.1-mini</span>
+          </span>
+          <span id="settingsChevron" class="chevron" aria-hidden="true">&#8964;</span>
+        </button>
+
+        <div id="settingsBody" class="panel-body">
+          <label class="field">
+            <span>模板</span>
+            <select id="preset">
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="siliconflow">SiliconFlow</option>
+              <option value="ollama">Ollama 本地模型</option>
+              <option value="custom">自定义本地 OpenAI 兼容接口</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>API URL</span>
+            <input id="apiUrl" type="url" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>Model ID</span>
+            <input id="model" type="text" placeholder="例如：gpt-4.1-mini" spellcheck="false">
+          </label>
+
+          <label class="field">
+            <span>API Key</span>
+            <input id="apiKey" type="password" placeholder="sk-..." spellcheck="false">
+          </label>
+
+          <div class="config-actions">
+            <button id="saveButton" class="secondary" type="button">保存配置</button>
+            <a class="config-link" href="privacy-policy.html" target="_blank" rel="noreferrer">
+              隐私说明
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

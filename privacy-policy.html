@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PageBrief 隐私说明</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5efe7;
+        --panel: rgba(255, 255, 255, 0.92);
+        --border: rgba(95, 74, 54, 0.14);
+        --text: #201a16;
+        --muted: #6a5c51;
+        --accent: #8f3a24;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(181, 77, 47, 0.16), transparent 36%),
+          linear-gradient(180deg, #f6eee6, #f3f6fb);
+        color: var(--text);
+        font: 16px/1.65 "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 28px 18px 44px;
+      }
+
+      .panel {
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: var(--panel);
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 14px;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        margin-top: 26px;
+        font-size: 20px;
+      }
+
+      p,
+      li {
+        color: var(--muted);
+      }
+
+      ul {
+        padding-left: 20px;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      .meta {
+        margin-bottom: 18px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>PageBrief 隐私说明</h1>
+        <p class="meta">
+          发布前请将本文中的产品名称、联系邮箱、官方网站与日期替换为你的正式信息，并部署到公开的 HTTPS 页面作为商店隐私政策链接。
+        </p>
+
+        <p>
+          本隐私说明适用于浏览器扩展“PageBrief”。该扩展的单一用途是在用户主动点击后，对当前网页生成摘要。
+        </p>
+
+        <h2>1. 插件会处理哪些数据</h2>
+        <ul>
+          <li>当前网页的标题、URL、描述、正文片段，或用户当前选中的文本。</li>
+          <li>用户填写的模型配置，包括模型服务模板、API URL、Model ID 与 API Key。</li>
+          <li>插件本地生成的摘要结果、最近 10 条摘要缓存与调试日志。</li>
+        </ul>
+
+        <h2>2. 数据在什么情况下会发送出去</h2>
+        <ul>
+          <li>只有当用户主动点击“总结当前页”时，插件才会把网页内容发送到用户选择的模型服务。</li>
+          <li>插件不会把网页内容发送给本扩展开发者自己的服务器；当前版本不包含开发者中转后端。</li>
+          <li>如果用户选择的是第三方模型服务，例如 OpenAI、DeepSeek、OpenRouter 或 SiliconFlow，则数据会直接发送到对应服务提供方。</li>
+          <li>如果用户选择的是本地模型接口，例如 Ollama、LM Studio 或其他本机 OpenAI 兼容服务，则数据只会发送到本地地址。</li>
+        </ul>
+
+        <h2>3. 数据会存在哪里</h2>
+        <ul>
+          <li>最近摘要与调试日志保存在当前浏览器的本地扩展存储中。</li>
+          <li>模型配置仅会在用户点击保存配置后写入当前浏览器本地，以便下次继续使用。</li>
+          <li>开发者不会自动接收这些本地存储内容。</li>
+        </ul>
+
+        <h2>4. 数据用途</h2>
+        <ul>
+          <li>读取当前网页内容，仅用于生成摘要。</li>
+          <li>保存模型配置，仅用于减少重复输入。</li>
+          <li>保存最近摘要与调试日志，仅用于提升使用体验与排查错误。</li>
+        </ul>
+
+        <h2>5. 数据共享</h2>
+        <ul>
+          <li>本扩展不会出售用户数据。</li>
+          <li>本扩展不会将用户数据用于广告定向。</li>
+          <li>本扩展仅会在用户主动操作时，将当前网页内容发送给用户自己选择的模型服务提供方。</li>
+        </ul>
+
+        <h2>6. 用户可以如何控制数据</h2>
+        <ul>
+          <li>用户可以不填写 API Key，仅使用本地模型接口。</li>
+          <li>用户可以修改或清空本地保存的模型配置。</li>
+          <li>用户可以在插件界面中清空本地调试日志。</li>
+          <li>用户可以卸载扩展，以移除浏览器本地扩展存储中的相关数据。</li>
+        </ul>
+
+        <h2>7. 联系方式</h2>
+        <p>
+          联系邮箱：<code>wyclemon@foxmail.com</code><br>
+          官方网站：<code>请替换为你的官网或 GitHub Pages 链接</code>
+        </p>
+
+        <h2>8. 生效日期</h2>
+        <p><code>请替换为正式发布日期，例如 2026-04-20</code></p>
+      </section>
+    </main>
+  </body>
+</html>
