@@ -460,8 +460,8 @@ button:disabled {
 }
 
 .secondary {
-  flex: 0 0 auto;
-  min-width: 132px;
+  flex: 1 1 auto;
+  min-width: 160px;
   padding: 11px 14px;
   border-radius: 16px;
   background: rgba(239, 228, 217, 0.92);
