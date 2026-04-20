@@ -2,6 +2,7 @@ const STORAGE_KEY = "pageSummaryAiSettings";
 const DEBUG_STORAGE_KEY = "pageSummaryAiDebugLog";
 const UI_STATE_STORAGE_KEY = "pageSummaryAiUiState";
 const SUMMARY_CACHE_STORAGE_KEY = "pageSummaryAiSummaryCache";
+const LOCALE_STORAGE_KEY = "pageBriefLocale";
 const DEFAULT_SUMMARY_LIMIT = 60;
 const MIN_SUMMARY_LIMIT = 60;
 const MAX_SUMMARY_LIMIT = 150;
@@ -60,6 +61,198 @@ const SENTENCE_ENDING_SET = new Set(["。", "！", "？", "!", "?"]);
 const CLAUSE_ENDING_SET = new Set(["，", ",", "、", "；", ";", "：", ":"]);
 const SENTENCE_ENDING_PATTERN = /[。！？!?]$/;
 const LOCALHOST_HOSTNAMES = new Set(["127.0.0.1", "localhost"]);
+const SUPPORTED_LOCALES = new Set(["zh", "en"]);
+const DEFAULT_LOCALE = "zh";
+const OPENROUTER_REQUEST_TITLE = "PageBrief";
+const PRESET_OPTION_LABELS = {
+  openai: {
+    zh: "OpenAI",
+    en: "OpenAI"
+  },
+  deepseek: {
+    zh: "DeepSeek",
+    en: "DeepSeek"
+  },
+  openrouter: {
+    zh: "OpenRouter",
+    en: "OpenRouter"
+  },
+  siliconflow: {
+    zh: "SiliconFlow",
+    en: "SiliconFlow"
+  },
+  ollama: {
+    zh: "Ollama 本地模型",
+    en: "Ollama Local"
+  },
+  custom: {
+    zh: "本地接口",
+    en: "Local Endpoint"
+  }
+};
+const COPY_FEEDBACK_DURATION_MS = 1200;
+const MESSAGES = {
+  zh: {
+    languageLabel: "界面语言",
+    targetLength: "目标长度",
+    lengthText: "{value} 字",
+    debugLogs: "调试日志",
+    clearLogs: "清空日志",
+    noLogs: "暂无日志。",
+    summaryTitle: "摘要",
+    copy: "复制",
+    copied: "已复制",
+    summaryEmpty: "点击“总结当前页”生成结果。",
+    summarizePage: "总结当前页",
+    summarizing: "生成中...",
+    modelConfig: "模型配置",
+    presetLabel: "模板",
+    apiUrlLabel: "API URL",
+    modelIdLabel: "Model ID",
+    modelPlaceholder: "例如：gpt-4.1-mini",
+    apiKeyLabel: "API Key",
+    privacyPolicy: "隐私说明",
+    saveConfig: "保存配置",
+    saved: "已保存",
+    configSaved: "配置已保存。",
+    openUtility: "打开工具面板",
+    closeUtility: "关闭工具面板",
+    noModel: "未设模型",
+    preparingPage: "正在整理当前网页内容。",
+    readingPage: "正在读取网页内容…",
+    generatingSummary: "正在生成摘要…",
+    requestFailed: "本次请求失败。",
+    copyLogs: "复制日志",
+    logsCleared: "调试日志已清空。",
+    copySummaryFailed: "复制摘要失败。",
+    copyLogsFailed:
+      "复制调试日志失败。你可以右键弹窗选择检查，在 Console 里看更完整日志。",
+    clearLogsFailed: "清空调试日志失败。",
+    errorMissingApiUrl: "请先填写 API URL。",
+    errorMissingModel: "请先填写 Model ID。",
+    errorMissingApiKey: "请先填写 API Key。",
+    errorInvalidApiUrl: "API URL 格式不对。",
+    errorInvalidApiProtocol: "API URL 只支持 HTTP 或 HTTPS。",
+    errorRemoteHttp: "远程接口必须使用 HTTPS。",
+    errorPermissionDenied: "没有拿到接口访问权限。",
+    errorMissingTab: "没有找到当前标签页。",
+    errorEmptyPageText: "当前页面暂时读不到可总结内容。",
+    errorRequestTimeout: "模型响应超时，请稍后重试。",
+    errorRequestNetwork: "接口连接失败，请检查 URL 或网络。",
+    errorEmptyModelOutput: "模型返回为空，请换个模型再试。",
+    errorGenericSummary: "总结失败，请稍后再试。",
+    errorRequestTimeoutDetail: "模型请求超时，{seconds} 秒内没有返回。",
+    errorRequestNetworkDetail: "请求 {origin} 失败。",
+    errorApiResponseFallback: "模型请求失败，HTTP {status}。",
+    errorApiResponseDetail: "模型请求失败：{detail}",
+    apiStatus400: "请求参数有误，请检查模型 ID。",
+    apiStatus401: "鉴权失败，请检查 API Key。",
+    apiStatus404: "接口地址不对，请检查 API URL。",
+    apiStatus408: "模型响应超时，请稍后重试。",
+    apiStatus429: "请求过于频繁，请稍后再试。",
+    apiStatus5xx: "模型服务暂时不可用，请稍后重试。",
+    apiStatusDefault: "模型返回了错误结果，请检查配置。",
+    modelOutputFallback: "模型没有返回可展示的摘要。",
+    logInitFailed: "初始化失败",
+    logCacheRestored: "已恢复最近摘要",
+    logInitReady: "插件已加载",
+    logSaveFailed: "保存配置失败",
+    logRequestStart: "开始总结",
+    logCachePersistFailed: "缓存摘要失败",
+    logRequestFailed: "总结失败",
+    logSaveSuccess: "手动保存成功",
+    logPermissionExists: "网络权限已存在",
+    logPermissionGranted: "已授予网络权限",
+    logPageExtracted: "页面内容已提取",
+    logSummaryCached: "已缓存网页摘要",
+    logLengthOutOfRange: "首轮摘要未落入目标区间",
+    logLengthStillOutOfRange: "修正后仍未落入目标区间",
+    logResponseReceived: "模型接口已返回",
+    logCopySummaryFailed: "复制摘要失败",
+    logCopyLogsFailed: "复制调试日志失败",
+    logClearLogsFailed: "清空调试日志失败"
+  },
+  en: {
+    languageLabel: "Language",
+    targetLength: "Length",
+    lengthText: "{value} chars",
+    debugLogs: "Debug Log",
+    clearLogs: "Clear log",
+    noLogs: "No logs yet.",
+    summaryTitle: "Summary",
+    copy: "Copy",
+    copied: "Copied",
+    summaryEmpty: "Click “Summarize This Page” to generate a summary.",
+    summarizePage: "Summarize This Page",
+    summarizing: "Summarizing...",
+    modelConfig: "Model Setup",
+    presetLabel: "Preset",
+    apiUrlLabel: "API URL",
+    modelIdLabel: "Model ID",
+    modelPlaceholder: "e.g. gpt-4.1-mini",
+    apiKeyLabel: "API Key",
+    privacyPolicy: "Privacy Policy",
+    saveConfig: "Save Settings",
+    saved: "Saved",
+    configSaved: "Settings saved.",
+    openUtility: "Open tools",
+    closeUtility: "Close tools",
+    noModel: "No model",
+    preparingPage: "Preparing page content.",
+    readingPage: "Reading page content…",
+    generatingSummary: "Generating summary…",
+    requestFailed: "This request failed.",
+    copyLogs: "Copy logs",
+    logsCleared: "Debug log cleared.",
+    copySummaryFailed: "Couldn't copy the summary.",
+    copyLogsFailed:
+      "Couldn't copy the debug log. Open the popup inspector and check Console for details.",
+    clearLogsFailed: "Couldn't clear the debug log.",
+    errorMissingApiUrl: "Enter an API URL first.",
+    errorMissingModel: "Enter a Model ID first.",
+    errorMissingApiKey: "Enter an API key first.",
+    errorInvalidApiUrl: "The API URL format is invalid.",
+    errorInvalidApiProtocol: "The API URL must use HTTP or HTTPS.",
+    errorRemoteHttp: "Remote endpoints must use HTTPS.",
+    errorPermissionDenied: "The network permission was not granted.",
+    errorMissingTab: "The current tab could not be found.",
+    errorEmptyPageText: "This page does not expose readable content right now.",
+    errorRequestTimeout: "The model timed out. Please try again.",
+    errorRequestNetwork: "The endpoint could not be reached. Check the URL or network.",
+    errorEmptyModelOutput: "The model returned no content. Try another model.",
+    errorGenericSummary: "The summary could not be generated. Please try again.",
+    errorRequestTimeoutDetail: "The model request timed out after {seconds} seconds.",
+    errorRequestNetworkDetail: "Request to {origin} failed.",
+    errorApiResponseFallback: "Model request failed with HTTP {status}.",
+    errorApiResponseDetail: "Model request failed: {detail}",
+    apiStatus400: "The request looks invalid. Check the Model ID.",
+    apiStatus401: "Authentication failed. Check the API key.",
+    apiStatus404: "The endpoint was not found. Check the API URL.",
+    apiStatus408: "The model timed out. Please try again.",
+    apiStatus429: "Too many requests. Please wait and try again.",
+    apiStatus5xx: "The model service is unavailable right now. Please try again later.",
+    apiStatusDefault: "The model returned an error. Check the configuration.",
+    modelOutputFallback: "The model returned no summary to display.",
+    logInitFailed: "Initialization failed",
+    logCacheRestored: "Recent summary restored",
+    logInitReady: "Extension loaded",
+    logSaveFailed: "Saving settings failed",
+    logRequestStart: "Summary started",
+    logCachePersistFailed: "Saving summary cache failed",
+    logRequestFailed: "Summary failed",
+    logSaveSuccess: "Settings saved manually",
+    logPermissionExists: "Network permission already granted",
+    logPermissionGranted: "Network permission granted",
+    logPageExtracted: "Page content extracted",
+    logSummaryCached: "Summary cached",
+    logLengthOutOfRange: "First summary missed the target length",
+    logLengthStillOutOfRange: "Revised summary still missed the target length",
+    logResponseReceived: "Model response received",
+    logCopySummaryFailed: "Copying summary failed",
+    logCopyLogsFailed: "Copying debug log failed",
+    logClearLogsFailed: "Clearing debug log failed"
+  }
+};
 
 const elements = {
   app: document.querySelector(".app"),
@@ -83,64 +276,180 @@ const elements = {
   toggleUtilityButton: document.querySelector("#toggleUtilityButton"),
   utilityWrap: document.querySelector("#utilityWrap"),
   utilityPanel: document.querySelector("#utilityPanel"),
+  localeSwitch: document.querySelector("#localeSwitch"),
+  localeZhButton: document.querySelector("#localeZhButton"),
+  localeEnButton: document.querySelector("#localeEnButton"),
   statusBar: document.querySelector("#statusBar"),
   summary: document.querySelector("#summary"),
   debugLog: document.querySelector("#debugLog"),
   copyLogsButton: document.querySelector("#copyLogsButton"),
-  clearLogsButton: document.querySelector("#clearLogsButton")
+  clearLogsButton: document.querySelector("#clearLogsButton"),
+  configLink: document.querySelector(".config-link")
+};
+const i18nNodes = {
+  text: Array.from(document.querySelectorAll("[data-i18n]")),
+  placeholder: Array.from(document.querySelectorAll("[data-i18n-placeholder]"))
 };
 
 let debugEntries = [];
 let buttonFlashTimers = new WeakMap();
 let statusTimer = 0;
+let currentLocale = DEFAULT_LOCALE;
+let isBusy = false;
 let settingsState = createDefaultSettingsState();
 let uiState = {
   settingsCollapsed: false,
   utilityOpen: false
 };
+let statusState = null;
+let summaryState = {
+  type: "placeholder",
+  key: "summaryEmpty"
+};
+
+function normalizeLocale(locale) {
+  const normalized = String(locale || "").toLowerCase();
+  return normalized.startsWith("en") ? "en" : DEFAULT_LOCALE;
+}
+
+function t(key, params = {}) {
+  const template =
+    MESSAGES[currentLocale]?.[key] ?? MESSAGES[DEFAULT_LOCALE]?.[key] ?? key;
+
+  return template.replace(/\{(\w+)\}/g, (_, token) => String(params[token] ?? ""));
+}
+
+function formatLength(value) {
+  return t("lengthText", {
+    value: normalizeSummaryLimit(value)
+  });
+}
+
+function getPresetLabel(presetKey) {
+  const labels = PRESET_OPTION_LABELS[presetKey] || PRESET_OPTION_LABELS.custom;
+  return labels[currentLocale] || labels[DEFAULT_LOCALE];
+}
+
+function renderPresetOptions() {
+  Array.from(elements.preset.options).forEach((option) => {
+    option.textContent = getPresetLabel(option.value);
+  });
+}
+
+function renderLocaleSwitch() {
+  const isZh = currentLocale === "zh";
+  elements.localeZhButton.classList.toggle("is-active", isZh);
+  elements.localeZhButton.setAttribute("aria-pressed", String(isZh));
+  elements.localeEnButton.classList.toggle("is-active", !isZh);
+  elements.localeEnButton.setAttribute("aria-pressed", String(!isZh));
+  elements.localeSwitch.setAttribute("aria-label", t("languageLabel"));
+}
+
+function renderButtonText(button, labelKey) {
+  button.dataset.labelKey = labelKey;
+  button.dataset.originalText = t(labelKey);
+  button.textContent = button.dataset.flashKey ? t(button.dataset.flashKey) : t(labelKey);
+}
+
+function renderActionLabels() {
+  renderButtonText(elements.saveButton, "saveConfig");
+  renderButtonText(elements.copySummaryButton, "copy");
+  renderButtonText(elements.copyLogsButton, "copyLogs");
+  elements.configLink.textContent = t("privacyPolicy");
+  const utilityLabel = uiState.utilityOpen ? t("closeUtility") : t("openUtility");
+  elements.toggleUtilityButton.setAttribute("aria-label", utilityLabel);
+  elements.toggleUtilityButton.title = utilityLabel;
+  elements.clearLogsButton.setAttribute("aria-label", t("clearLogs"));
+  elements.clearLogsButton.title = t("clearLogs");
+  elements.summarizeButton.textContent = isBusy ? t("summarizing") : t("summarizePage");
+}
+
+function renderStatusState() {
+  const message = statusState
+    ? statusState.type === "key"
+      ? t(statusState.key, statusState.params)
+      : statusState.text
+    : "";
+
+  applyStatusMessage(message, statusState?.tone || "neutral");
+}
+
+function renderSummaryState() {
+  if (summaryState.type === "content") {
+    elements.summary.textContent = summaryState.text;
+    elements.summary.classList.remove("empty");
+    renderCopySummaryState(true);
+    return;
+  }
+
+  elements.summary.textContent = t(summaryState.key, summaryState.params);
+  elements.summary.classList.add("empty");
+  renderCopySummaryState(false);
+}
+
+function applyLocale() {
+  document.documentElement.lang = currentLocale === "zh" ? "zh-CN" : "en";
+
+  i18nNodes.text.forEach((node) => {
+    node.textContent = t(node.dataset.i18n);
+  });
+
+  i18nNodes.placeholder.forEach((node) => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+
+  renderPresetOptions();
+  renderLocaleSwitch();
+  renderActionLabels();
+  renderSettingsSnapshot(readDraftSettingsFromForm());
+  renderSummaryLimit(elements.summaryLimit.value);
+  renderDebugLog();
+  renderSummaryState();
+  renderStatusState();
+  renderUiState();
+}
 
 init().catch((error) => {
   elements.app.classList.add("is-ready");
-  void logDebug("INIT", "初始化失败", formatErrorForLog(error));
-  setStatus(resolveErrorHint(error), "error");
+  void logDebug("INIT", t("logInitFailed"), formatErrorForLog(error));
+  setStatusKey(resolveErrorHintKey(error), "error");
 });
 
 async function init() {
   bindEvents();
 
-  const [settings, logs, savedUiState, summaryCache, currentTab] = await Promise.all([
+  const [settings, logs, savedUiState, summaryCache, currentTab, savedLocale] = await Promise.all([
     loadSettings(),
     loadDebugLog(),
     loadUiState(),
     loadSummaryCache(),
-    queryCurrentTab()
+    queryCurrentTab(),
+    loadLocale()
   ]);
 
+  currentLocale = savedLocale;
   debugEntries = logs;
   uiState = resolveInitialUiState(settings, savedUiState);
   const cachedSummary = findCachedSummaryForUrl(summaryCache, currentTab?.url || "");
 
   hydrateForm(settings);
-  renderSettingsSnapshot(settings);
-  renderSummaryLimit(settings.summaryLimit);
-  renderDebugLog();
-  renderUiState();
+  applyLocale();
   if (cachedSummary?.summary) {
     renderSummary(cachedSummary.summary);
   } else {
-    renderCopySummaryState(false);
+    resetSummaryState("summaryEmpty");
   }
-  setStatus("");
+  clearStatus();
   elements.app.classList.add("is-ready");
 
   if (cachedSummary?.summary) {
-    await logDebug("CACHE", "已恢复最近摘要", {
+    await logDebug("CACHE", t("logCacheRestored"), {
       url: cachedSummary.url,
       updatedAt: cachedSummary.updatedAt
     });
   }
 
-  await logDebug("INIT", "插件已加载", {
+  await logDebug("INIT", t("logInitReady"), {
     preset: settings.preset,
     hasApiKey: Boolean(settings.apiKey),
     summaryLimit: settings.summaryLimit
@@ -154,6 +463,12 @@ function bindEvents() {
   elements.copySummaryButton.addEventListener("click", onCopySummary);
   elements.copyLogsButton.addEventListener("click", onCopyLogs);
   elements.clearLogsButton.addEventListener("click", onClearLogs);
+  elements.localeZhButton.addEventListener("click", () => {
+    void onLocaleChange("zh");
+  });
+  elements.localeEnButton.addEventListener("click", () => {
+    void onLocaleChange("en");
+  });
   elements.toggleSettingsButton.addEventListener("click", onToggleSettings);
   elements.toggleUtilityButton.addEventListener("click", onToggleUtility);
   elements.summaryLimit.addEventListener("input", onSummaryLimitInput);
@@ -170,6 +485,15 @@ async function loadSettings() {
   const { [STORAGE_KEY]: saved } = await chrome.storage.local.get(STORAGE_KEY);
   settingsState = normalizeSettingsState(saved);
   return getActiveSettings(settingsState);
+}
+
+async function loadLocale() {
+  const { [LOCALE_STORAGE_KEY]: saved } = await chrome.storage.local.get(LOCALE_STORAGE_KEY);
+  return normalizeLocale(saved || navigator.language);
+}
+
+async function persistLocale() {
+  await chrome.storage.local.set({ [LOCALE_STORAGE_KEY]: currentLocale });
 }
 
 async function loadUiState() {
@@ -289,13 +613,12 @@ function hydrateForm(settings) {
 }
 
 function renderSettingsSnapshot(settings) {
-  const preset = PRESETS[settings.preset] || PRESETS.custom;
-  const modelText = settings.model || "未设模型";
-  elements.presetBadge.textContent = preset.label;
+  const modelText = settings.model || t("noModel");
+  elements.presetBadge.textContent = getPresetLabel(settings.preset);
   elements.presetBadge.dataset.theme = PRESET_THEMES[settings.preset] || "custom";
   elements.modelBadge.textContent = modelText;
-  elements.lengthBadge.textContent = `${settings.summaryLimit} 字`;
-  elements.configSummary.textContent = `${preset.label} · ${modelText}`;
+  elements.lengthBadge.textContent = formatLength(settings.summaryLimit);
+  elements.configSummary.textContent = `${getPresetLabel(settings.preset)} · ${modelText}`;
 }
 
 async function onPresetChange() {
@@ -324,8 +647,19 @@ function onSummaryLimitInput() {
   renderSettingsSnapshot(settings);
 }
 
+async function onLocaleChange(locale) {
+  const nextLocale = normalizeLocale(locale);
+  if (!SUPPORTED_LOCALES.has(nextLocale) || nextLocale === currentLocale) {
+    return;
+  }
+
+  currentLocale = nextLocale;
+  applyLocale();
+  await persistLocale();
+}
+
 function renderSummaryLimit(limit) {
-  elements.summaryLimitValue.textContent = `${normalizeSummaryLimit(limit)} 字`;
+  elements.summaryLimitValue.textContent = formatLength(limit);
 }
 
 async function onSave() {
@@ -333,10 +667,10 @@ async function onSave() {
     const settings = await saveSettings();
     renderSettingsSnapshot(settings);
     collapseSettingsPanel();
-    flashButtonLabel(elements.saveButton, "已保存");
-    setStatus("配置已保存。", "success");
+    flashButtonLabel(elements.saveButton, "saved");
+    setStatusKey("configSaved", "success");
   } catch (error) {
-    void logDebug("SAVE", "保存配置失败", formatErrorForLog(error));
+    void logDebug("SAVE", t("logSaveFailed"), formatErrorForLog(error));
     handleInputError(error);
   }
 }
@@ -352,12 +686,12 @@ async function onSummarize() {
   }
 
   setBusy(true);
-  resetSummaryState("正在整理当前网页内容。");
+  resetSummaryState("preparingPage");
 
   try {
     settingsState = mergeSettingsIntoState(settingsState, settings);
     renderSettingsSnapshot(settings);
-    await logDebug("REQUEST", "开始总结", {
+    await logDebug("REQUEST", t("logRequestStart"), {
       preset: settings.preset,
       apiUrl: settings.apiUrl,
       model: settings.model,
@@ -367,22 +701,22 @@ async function onSummarize() {
 
     await ensureApiPermission(settings.apiUrl);
 
-    setStatus("正在读取网页内容…", "progress");
+    setStatusKey("readingPage", "progress");
     const pageData = await extractCurrentPage();
 
-    setStatus("正在生成摘要…", "progress");
+    setStatusKey("generatingSummary", "progress");
     const summary = await requestSummary(settings, pageData);
     renderSummary(summary);
     try {
       await persistSummaryEntry(pageData, summary);
     } catch (cacheError) {
-      void logDebug("CACHE", "缓存摘要失败", formatErrorForLog(cacheError));
+      void logDebug("CACHE", t("logCachePersistFailed"), formatErrorForLog(cacheError));
     }
-    setStatus("");
+    clearStatus();
   } catch (error) {
-    resetSummaryState("本次请求失败。");
-    void logDebug("REQUEST", "总结失败", formatErrorForLog(error));
-    setStatus(resolveErrorHint(error), "error");
+    resetSummaryState("requestFailed");
+    void logDebug("REQUEST", t("logRequestFailed"), formatErrorForLog(error));
+    setStatusKey(resolveErrorHintKey(error), "error");
   } finally {
     setBusy(false);
   }
@@ -403,13 +737,13 @@ function readSettingsFromForm(options = {}) {
   const settings = readDraftSettingsFromForm();
 
   if (!settings.apiUrl) {
-    throw createUiError("missing_api_url", "请先填写 API URL。", {
+    throw createUiError("missing_api_url", t("errorMissingApiUrl"), {
       field: elements.apiUrl
     });
   }
 
   if (!settings.model) {
-    throw createUiError("missing_model", "请先填写 Model ID。", {
+    throw createUiError("missing_model", t("errorMissingModel"), {
       field: elements.model
     });
   }
@@ -418,25 +752,25 @@ function readSettingsFromForm(options = {}) {
   try {
     parsedUrl = new URL(settings.apiUrl);
   } catch {
-    throw createUiError("invalid_api_url", "API URL 格式不对。", {
+    throw createUiError("invalid_api_url", t("errorInvalidApiUrl"), {
       field: elements.apiUrl
     });
   }
 
   if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-    throw createUiError("invalid_api_protocol", "API URL 只支持 HTTP 或 HTTPS。", {
+    throw createUiError("invalid_api_protocol", t("errorInvalidApiProtocol"), {
       field: elements.apiUrl
     });
   }
 
   if (parsedUrl.protocol === "http:" && !isLocalhostUrl(parsedUrl)) {
-    throw createUiError("remote_http_not_allowed", "远程模型接口必须使用 HTTPS。", {
+    throw createUiError("remote_http_not_allowed", t("errorRemoteHttp"), {
       field: elements.apiUrl
     });
   }
 
   if (requireApiKey && !isLocalhostUrl(parsedUrl) && !settings.apiKey) {
-    throw createUiError("missing_api_key", "请先填写 API Key。", {
+    throw createUiError("missing_api_key", t("errorMissingApiKey"), {
       field: elements.apiKey
     });
   }
@@ -461,7 +795,7 @@ async function saveSettings() {
   const settings = readSettingsFromForm();
   settingsState = mergeSettingsIntoState(settingsState, settings);
   await persistSettingsState();
-  void logDebug("SAVE", "手动保存成功", {
+  void logDebug("SAVE", t("logSaveSuccess"), {
     preset: settings.preset,
     apiUrl: settings.apiUrl,
     model: settings.model,
@@ -477,16 +811,16 @@ async function ensureApiPermission(apiUrl) {
   const alreadyGranted = await chrome.permissions.contains(permissionRequest);
 
   if (alreadyGranted) {
-    await logDebug("PERMISSION", "网络权限已存在", { origin });
+    await logDebug("PERMISSION", t("logPermissionExists"), { origin });
     return;
   }
 
   const granted = await chrome.permissions.request(permissionRequest);
   if (!granted) {
-    throw createUiError("permission_denied", "没有拿到接口访问权限。", { origin });
+    throw createUiError("permission_denied", t("errorPermissionDenied"), { origin });
   }
 
-  await logDebug("PERMISSION", "已授予网络权限", { origin });
+  await logDebug("PERMISSION", t("logPermissionGranted"), { origin });
 }
 
 async function queryCurrentTab() {
@@ -498,7 +832,7 @@ async function extractCurrentPage() {
   const tab = await queryCurrentTab();
 
   if (!tab?.id) {
-    throw createUiError("missing_tab", "没有找到当前标签页。");
+    throw createUiError("missing_tab", t("errorMissingTab"));
   }
 
   const [{ result }] = await chrome.scripting.executeScript({
@@ -508,10 +842,10 @@ async function extractCurrentPage() {
   });
 
   if (!result?.text) {
-    throw createUiError("empty_page_text", "当前页面暂时读不到可总结内容。");
+    throw createUiError("empty_page_text", t("errorEmptyPageText"));
   }
 
-  await logDebug("PAGE", "页面内容已提取", {
+  await logDebug("PAGE", t("logPageExtracted"), {
     title: result.title,
     usedSelection: result.usedSelection,
     textLength: [...result.text].length
@@ -541,7 +875,7 @@ async function persistSummaryEntry(pageData, summary) {
   ].slice(0, MAX_SUMMARY_CACHE_ENTRIES);
 
   await chrome.storage.local.set({ [SUMMARY_CACHE_STORAGE_KEY]: nextCache });
-  await logDebug("CACHE", "已缓存网页摘要", {
+  await logDebug("CACHE", t("logSummaryCached"), {
     url: pageData.url,
     cacheSize: nextCache.length
   });
@@ -603,7 +937,7 @@ async function requestSummary(settings, pageData) {
   let normalizedSummary = compactSummaryText(summary);
 
   if (!isWithinTargetRange(normalizedSummary, targetRange)) {
-    await logDebug("LENGTH", "首轮摘要未落入目标区间", {
+    await logDebug("LENGTH", t("logLengthOutOfRange"), {
       target: targetRange.target,
       min: targetRange.min,
       max: targetRange.max,
@@ -618,7 +952,7 @@ async function requestSummary(settings, pageData) {
   }
 
   if (!isWithinTargetRange(normalizedSummary, targetRange)) {
-    await logDebug("LENGTH", "修正后仍未落入目标区间", {
+    await logDebug("LENGTH", t("logLengthStillOutOfRange"), {
       target: targetRange.target,
       min: targetRange.min,
       max: targetRange.max,
@@ -642,7 +976,7 @@ async function requestSummaryOnce(settings, messages) {
 
   if (requestUrl.includes("openrouter.ai")) {
     headers["HTTP-Referer"] = "https://page-summary.local";
-    headers["X-Title"] = "网页摘要";
+    headers["X-Title"] = OPENROUTER_REQUEST_TITLE;
   }
 
   const requestBody = {
@@ -670,7 +1004,7 @@ async function requestSummaryOnce(settings, messages) {
 
   const rawText = await response.text();
   const data = parseJsonSafely(rawText);
-  await logDebug("RESPONSE", "模型接口已返回", {
+  await logDebug("RESPONSE", t("logResponseReceived"), {
     url: requestUrl,
     status: response.status,
     ok: response.ok,
@@ -683,7 +1017,7 @@ async function requestSummaryOnce(settings, messages) {
 
   const rawSummary = readModelText(data, rawText);
   if (!rawSummary) {
-    throw createUiError("empty_model_output", "模型返回为空，请换个模型再试。");
+    throw createUiError("empty_model_output", t("errorEmptyModelOutput"));
   }
 
   return rawSummary;
@@ -794,7 +1128,7 @@ function readModelText(data, rawText = "") {
 function normalizeSummary(text, summaryLimit) {
   const compact = compactSummaryText(text);
   const normalized = trimSummaryToCompleteSentence(compact, summaryLimit);
-  return normalized || "模型没有返回可展示的摘要。";
+  return normalized || t("modelOutputFallback");
 }
 
 function compactSummaryText(text) {
@@ -894,32 +1228,38 @@ function isWithinTargetRange(text, targetRange) {
 }
 
 function renderSummary(summary) {
-  elements.summary.textContent = summary;
-  elements.summary.classList.remove("empty");
-  renderCopySummaryState(true);
+  summaryState = {
+    type: "content",
+    text: summary
+  };
+  renderSummaryState();
 }
 
-function resetSummaryState(message) {
-  elements.summary.textContent = message;
-  elements.summary.classList.add("empty");
-  renderCopySummaryState(false);
+function resetSummaryState(messageKey, params = {}) {
+  summaryState = {
+    type: "placeholder",
+    key: messageKey,
+    params
+  };
+  renderSummaryState();
 }
 
 function renderCopySummaryState(enabled) {
-  elements.copySummaryButton.disabled = !enabled;
+  elements.copySummaryButton.disabled = isBusy || !enabled;
 }
 
-function setBusy(isBusy) {
+function setBusy(nextBusy) {
+  isBusy = nextBusy;
   elements.saveButton.disabled = isBusy;
   elements.summarizeButton.disabled = isBusy;
   elements.copyLogsButton.disabled = isBusy;
   elements.clearLogsButton.disabled = isBusy || !debugEntries.length;
   elements.summaryLimit.disabled = isBusy;
   elements.copySummaryButton.disabled = isBusy || elements.summary.classList.contains("empty");
-  elements.summarizeButton.textContent = isBusy ? "生成中..." : "总结当前页";
+  elements.summarizeButton.textContent = isBusy ? t("summarizing") : t("summarizePage");
 }
 
-function setStatus(message, tone = "neutral") {
+function applyStatusMessage(message, tone = "neutral") {
   window.clearTimeout(statusTimer);
   elements.statusBar.textContent = message;
   elements.statusBar.dataset.tone = tone;
@@ -932,6 +1272,23 @@ function setStatus(message, tone = "neutral") {
   statusTimer = window.setTimeout(() => {
     elements.statusBar.classList.add("is-hidden");
   }, HINT_AUTO_HIDE_MS);
+}
+
+function setStatusKey(key, tone = "neutral", params = {}) {
+  statusState = key
+    ? {
+        type: "key",
+        key,
+        params,
+        tone
+      }
+    : null;
+  renderStatusState();
+}
+
+function clearStatus() {
+  statusState = null;
+  renderStatusState();
 }
 
 function resolveApiKey(settings, requestUrl) {
@@ -992,7 +1349,7 @@ async function loadDebugLog() {
 }
 
 async function logDebug(stage, message, extra = null) {
-  const stamp = new Date().toLocaleTimeString("zh-CN", {
+  const stamp = new Date().toLocaleTimeString(currentLocale === "zh" ? "zh-CN" : "en-US", {
     hour12: false
   });
   const payload = extra ? ` ${stringifyForLog(extra)}` : "";
@@ -1002,7 +1359,7 @@ async function logDebug(stage, message, extra = null) {
 }
 
 function renderDebugLog() {
-  elements.debugLog.textContent = debugEntries.length ? debugEntries.join("\n\n") : "暂无日志。";
+  elements.debugLog.textContent = debugEntries.length ? debugEntries.join("\n\n") : t("noLogs");
   elements.clearLogsButton.disabled = elements.summarizeButton.disabled || !debugEntries.length;
 }
 
@@ -1011,10 +1368,9 @@ function renderUiState() {
   elements.toggleSettingsButton.setAttribute("aria-expanded", String(!uiState.settingsCollapsed));
   elements.utilityWrap.classList.toggle("is-open", uiState.utilityOpen);
   elements.utilityPanel.setAttribute("aria-hidden", String(!uiState.utilityOpen));
-  elements.toggleUtilityButton.setAttribute(
-    "aria-label",
-    uiState.utilityOpen ? "关闭工具面板" : "打开工具面板"
-  );
+  const utilityLabel = uiState.utilityOpen ? t("closeUtility") : t("openUtility");
+  elements.toggleUtilityButton.setAttribute("aria-label", utilityLabel);
+  elements.toggleUtilityButton.title = utilityLabel;
 }
 
 async function persistUiState() {
@@ -1084,20 +1440,20 @@ async function onCopySummary() {
 
   try {
     await navigator.clipboard.writeText(elements.summary.textContent);
-    flashButtonLabel(elements.copySummaryButton, "已复制");
+    flashButtonLabel(elements.copySummaryButton, "copied");
   } catch (error) {
-    void logDebug("COPY", "复制摘要失败", formatErrorForLog(error));
-    setStatus("复制摘要失败。", "error");
+    void logDebug("COPY", t("logCopySummaryFailed"), formatErrorForLog(error));
+    setStatusKey("copySummaryFailed", "error");
   }
 }
 
 async function onCopyLogs() {
   try {
     await navigator.clipboard.writeText(elements.debugLog.textContent);
-    flashButtonLabel(elements.copyLogsButton, "已复制");
+    flashButtonLabel(elements.copyLogsButton, "copied");
   } catch (error) {
-    void logDebug("LOG", "复制调试日志失败", formatErrorForLog(error));
-    setStatus("复制调试日志失败。你可以右键弹窗选择检查，在 Console 里看更完整日志。", "error");
+    void logDebug("LOG", t("logCopyLogsFailed"), formatErrorForLog(error));
+    setStatusKey("copyLogsFailed", "error");
   }
 }
 
@@ -1110,17 +1466,17 @@ async function onClearLogs() {
     debugEntries = [];
     renderDebugLog();
     await chrome.storage.local.remove(DEBUG_STORAGE_KEY);
-    setStatus("调试日志已清空。");
+    setStatusKey("logsCleared");
   } catch (error) {
-    void logDebug("LOG", "清空调试日志失败", formatErrorForLog(error));
-    setStatus("清空调试日志失败。", "error");
+    void logDebug("LOG", t("logClearLogsFailed"), formatErrorForLog(error));
+    setStatusKey("clearLogsFailed", "error");
   }
 }
 
-function flashButtonLabel(button, temporaryText) {
-  const originalText = button.dataset.originalText || button.textContent;
-  button.dataset.originalText = originalText;
-  button.textContent = temporaryText;
+function flashButtonLabel(button, temporaryKey) {
+  button.dataset.flashKey = temporaryKey;
+  button.dataset.originalText = button.dataset.labelKey ? t(button.dataset.labelKey) : button.textContent;
+  button.textContent = t(temporaryKey);
 
   const existingTimer = buttonFlashTimers.get(button);
   if (existingTimer) {
@@ -1128,9 +1484,10 @@ function flashButtonLabel(button, temporaryText) {
   }
 
   const timer = window.setTimeout(() => {
-    button.textContent = originalText;
+    delete button.dataset.flashKey;
+    button.textContent = button.dataset.labelKey ? t(button.dataset.labelKey) : button.dataset.originalText;
     buttonFlashTimers.delete(button);
-  }, 1200);
+  }, COPY_FEEDBACK_DURATION_MS);
 
   buttonFlashTimers.set(button, timer);
 }
@@ -1157,15 +1514,27 @@ function createUiError(code, message, extra = {}) {
 
 function createFetchRequestError(error, apiUrl) {
   if (error?.name === "AbortError") {
-    return createUiError("request_timeout", `模型请求超时，${REQUEST_TIMEOUT_MS / 1000} 秒内没有返回。`, {
-      origin: new URL(apiUrl).origin
-    });
+    return createUiError(
+      "request_timeout",
+      t("errorRequestTimeoutDetail", {
+        seconds: REQUEST_TIMEOUT_MS / 1000
+      }),
+      {
+        origin: new URL(apiUrl).origin
+      }
+    );
   }
 
-  return createUiError("request_network_error", `请求 ${new URL(apiUrl).origin} 失败。`, {
-    origin: new URL(apiUrl).origin,
-    causeName: error?.name || ""
-  });
+  return createUiError(
+    "request_network_error",
+    t("errorRequestNetworkDetail", {
+      origin: new URL(apiUrl).origin
+    }),
+    {
+      origin: new URL(apiUrl).origin,
+      causeName: error?.name || ""
+    }
+  );
 }
 
 function createApiResponseError(data, status, requestUrl) {
@@ -1173,9 +1542,9 @@ function createApiResponseError(data, status, requestUrl) {
     data?.error?.message ||
     data?.message ||
     data?.detail ||
-    `模型请求失败，HTTP ${status}。`;
+    t("errorApiResponseFallback", { status });
 
-  return createUiError("api_response_error", `模型请求失败：${detail}`, {
+  return createUiError("api_response_error", t("errorApiResponseDetail", { detail }), {
     status,
     requestUrl
   });
@@ -1190,72 +1559,72 @@ function handleInputError(error) {
     }, 0);
   }
 
-  setStatus(resolveErrorHint(error), "error");
+  setStatusKey(resolveErrorHintKey(error), "error");
 }
 
-function resolveErrorHint(error) {
+function resolveErrorHintKey(error) {
   if (!error) {
-    return "总结失败，请稍后再试。";
+    return "errorGenericSummary";
   }
 
   switch (error.code) {
     case "missing_api_url":
-      return "请先填写 API URL。";
+      return "errorMissingApiUrl";
     case "missing_model":
-      return "请先填写 Model ID。";
+      return "errorMissingModel";
     case "missing_api_key":
-      return "请先填写 API Key。";
+      return "errorMissingApiKey";
     case "invalid_api_url":
-      return "API URL 格式不对。";
+      return "errorInvalidApiUrl";
     case "invalid_api_protocol":
-      return "API URL 只支持 HTTP 或 HTTPS。";
+      return "errorInvalidApiProtocol";
     case "remote_http_not_allowed":
-      return "远程接口必须使用 HTTPS。";
+      return "errorRemoteHttp";
     case "permission_denied":
-      return "没有拿到接口访问权限。";
+      return "errorPermissionDenied";
     case "missing_tab":
-      return "没有找到当前标签页。";
+      return "errorMissingTab";
     case "empty_page_text":
-      return "当前页面暂时读不到可总结内容。";
+      return "errorEmptyPageText";
     case "request_timeout":
-      return "模型响应超时，请稍后重试。";
+      return "errorRequestTimeout";
     case "request_network_error":
-      return "接口连接失败，请检查 URL 或网络。";
+      return "errorRequestNetwork";
     case "empty_model_output":
-      return "模型返回为空，请换个模型再试。";
+      return "errorEmptyModelOutput";
     case "api_response_error":
-      return resolveApiStatusHint(error.status);
+      return resolveApiStatusHintKey(error.status);
     default:
-      return "总结失败，请稍后再试。";
+      return "errorGenericSummary";
   }
 }
 
-function resolveApiStatusHint(status) {
+function resolveApiStatusHintKey(status) {
   if (status === 400) {
-    return "请求参数有误，请检查模型 ID。";
+    return "apiStatus400";
   }
 
   if (status === 401 || status === 403) {
-    return "鉴权失败，请检查 API Key。";
+    return "apiStatus401";
   }
 
   if (status === 404) {
-    return "接口地址不对，请检查 API URL。";
+    return "apiStatus404";
   }
 
   if (status === 408) {
-    return "模型响应超时，请稍后重试。";
+    return "apiStatus408";
   }
 
   if (status === 429) {
-    return "请求过于频繁，请稍后再试。";
+    return "apiStatus429";
   }
 
   if (status >= 500) {
-    return "模型服务暂时不可用，请稍后重试。";
+    return "apiStatus5xx";
   }
 
-  return "模型返回了错误结果，请检查配置。";
+  return "apiStatusDefault";
 }
 
 function stringifyForLog(value) {
