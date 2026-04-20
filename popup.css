@@ -192,6 +192,47 @@ select {
   pointer-events: auto;
 }
 
+.utility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.utility-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.locale-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(95, 74, 54, 0.12);
+  border-radius: 999px;
+  background: rgba(239, 228, 217, 0.84);
+}
+
+.locale-button {
+  min-width: 54px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.locale-button.is-active {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--accent-strong);
+  box-shadow: 0 8px 16px rgba(74, 49, 34, 0.1);
+}
+
 .field {
   display: block;
   margin-bottom: 12px;
@@ -308,6 +349,7 @@ button:disabled {
 
 .ghost-button:active,
 .danger-icon-button:active,
+.locale-button:active,
 .icon-button:active,
 .primary:active,
 .secondary:active,
