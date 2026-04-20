@@ -7,12 +7,18 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f5efe7;
-        --panel: rgba(255, 255, 255, 0.92);
-        --border: rgba(95, 74, 54, 0.14);
+        --bg-top: #f7efe7;
+        --bg-bottom: #f2f5fa;
+        --surface: rgba(255, 255, 255, 0.92);
+        --surface-strong: rgba(255, 255, 255, 0.97);
+        --surface-soft: rgba(255, 249, 245, 0.9);
+        --border: rgba(95, 74, 54, 0.13);
         --text: #201a16;
         --muted: #6a5c51;
-        --accent: #8f3a24;
+        --accent: #b54d2f;
+        --accent-strong: #8f3a24;
+        --accent-soft: rgba(181, 77, 47, 0.1);
+        --shadow: 0 24px 60px rgba(74, 49, 34, 0.1);
       }
 
       * {
@@ -21,122 +27,424 @@
 
       body {
         margin: 0;
+        min-height: 100vh;
         background:
-          radial-gradient(circle at top left, rgba(181, 77, 47, 0.16), transparent 36%),
-          linear-gradient(180deg, #f6eee6, #f3f6fb);
+          radial-gradient(circle at top left, rgba(181, 77, 47, 0.18), transparent 34%),
+          radial-gradient(circle at 85% 0%, rgba(248, 224, 204, 0.36), transparent 26%),
+          linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
         color: var(--text);
-        font: 16px/1.65 "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
-      }
-
-      main {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 28px 18px 44px;
-      }
-
-      .panel {
-        padding: 24px;
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        background: var(--panel);
-      }
-
-      h1,
-      h2 {
-        margin: 0 0 14px;
-      }
-
-      h1 {
-        font-size: 32px;
-        line-height: 1.05;
-        letter-spacing: -0.02em;
-      }
-
-      h2 {
-        margin-top: 26px;
-        font-size: 20px;
-      }
-
-      p,
-      li {
-        color: var(--muted);
-      }
-
-      ul {
-        padding-left: 20px;
+        font: 16px/1.72 "Avenir Next", "SF Pro Text", "PingFang SC", "Microsoft YaHei",
+          sans-serif;
       }
 
       a {
-        color: var(--accent);
+        color: var(--accent-strong);
+        text-decoration: none;
       }
 
-      .meta {
-        margin-bottom: 18px;
-        font-size: 14px;
+      a:hover {
+        text-decoration: underline;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      ul {
+        margin: 0;
+      }
+
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 32px 18px 56px;
+      }
+
+      .hero {
+        position: relative;
+        padding: 34px 30px 30px;
+        border: 1px solid rgba(95, 74, 54, 0.1);
+        border-radius: 30px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.94)),
+          radial-gradient(circle at top left, rgba(181, 77, 47, 0.1), transparent 44%);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -72px;
+        bottom: -88px;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(181, 77, 47, 0.12), transparent 68%);
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 12px;
+        border: 1px solid rgba(181, 77, 47, 0.16);
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      h1 {
+        margin-top: 16px;
+        font-size: clamp(38px, 5vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+        font-family: "Iowan Old Style", "Times New Roman", serif;
+      }
+
+      .lead {
+        max-width: 720px;
+        margin-top: 16px;
+        font-size: 19px;
+        line-height: 1.72;
         color: var(--muted);
+      }
+
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+
+      .summary-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border: 1px solid rgba(95, 74, 54, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.74);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .sheet {
+        margin-top: 18px;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        background:
+          linear-gradient(180deg, var(--surface-strong), var(--surface)),
+          var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .sheet-head {
+        padding: 28px 30px 24px;
+        background:
+          linear-gradient(180deg, rgba(255, 249, 245, 0.94), rgba(255, 255, 255, 0.84)),
+          var(--surface-soft);
+      }
+
+      .sheet-label {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: rgba(32, 26, 22, 0.05);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .sheet-head h2 {
+        margin-top: 12px;
+        font-size: 30px;
+        line-height: 1.16;
+        letter-spacing: -0.03em;
+      }
+
+      .sheet-head p {
+        max-width: 720px;
+        margin-top: 12px;
+        color: var(--muted);
+      }
+
+      .policy-section {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: 18px;
+        padding: 26px 30px;
+        border-top: 1px solid rgba(95, 74, 54, 0.1);
+      }
+
+      .policy-index {
+        padding-top: 2px;
+      }
+
+      .policy-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 46px;
+        min-height: 32px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      .policy-topic {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .policy-body h3 {
+        font-size: 28px;
+        line-height: 1.18;
+        letter-spacing: -0.03em;
+      }
+
+      .policy-body p {
+        margin-top: 12px;
+        color: var(--muted);
+      }
+
+      .policy-body ul {
+        margin-top: 14px;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+
+      .policy-body li + li {
+        margin-top: 9px;
+      }
+
+      .footer {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 16px;
+        padding: 22px 30px 28px;
+        border-top: 1px solid rgba(95, 74, 54, 0.1);
+        background:
+          linear-gradient(180deg, rgba(255, 252, 249, 0.92), rgba(255, 255, 255, 0.86)),
+          var(--surface-soft);
+      }
+
+      .footer-card {
+        padding: 18px 18px 16px;
+        border: 1px solid rgba(95, 74, 54, 0.1);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .footer-title {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .footer-value {
+        margin-top: 10px;
+        font-size: 17px;
+        line-height: 1.65;
+        color: var(--text);
+        word-break: break-word;
+      }
+
+      .footer-date .footer-value {
+        font-size: 30px;
+        line-height: 1.2;
+        letter-spacing: -0.04em;
+        font-family: "Iowan Old Style", "Times New Roman", serif;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          font-size: 15px;
+        }
+
+        main {
+          padding: 22px 14px 38px;
+        }
+
+        .hero,
+        .sheet {
+          border-radius: 24px;
+        }
+
+        .hero {
+          padding: 24px 18px 22px;
+        }
+
+        .lead {
+          font-size: 17px;
+        }
+
+        .sheet-head,
+        .policy-section,
+        .footer {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+
+        .sheet-head h2,
+        .policy-body h3 {
+          font-size: 24px;
+        }
+
+        .policy-section {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .policy-index {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding-top: 0;
+        }
+
+        .policy-topic {
+          margin-top: 0;
+        }
+
+        .footer {
+          grid-template-columns: 1fr;
+        }
+
+        .footer-date .footer-value {
+          font-size: 24px;
+        }
       }
     </style>
   </head>
   <body>
     <main>
-      <section class="panel">
+      <section class="hero">
+        <div class="eyebrow">Privacy Policy</div>
         <h1>PageBrief 隐私说明</h1>
-        <p>
-          本隐私说明适用于浏览器扩展“PageBrief”。该扩展的单一用途是在用户主动点击后，对当前网页生成摘要。
+        <p class="lead">
+          PageBrief 只在用户主动点击“总结当前页”后处理当前网页内容，用来生成一段简短摘要。我们尽量少处理、少存储、少打扰，并把控制权留给用户。
         </p>
+        <div class="summary">
+          <span class="summary-pill">仅在用户主动操作后处理网页内容</span>
+          <span class="summary-pill">不经过开发者自有服务器</span>
+          <span class="summary-pill">配置仅在手动保存后写入本地</span>
+        </div>
+      </section>
 
-        <h2>1. 插件会处理哪些数据</h2>
-        <ul>
-          <li>当前网页的标题、URL、描述、正文片段，或用户当前选中的文本。</li>
-          <li>用户填写的模型配置，包括模型服务模板、API URL、Model ID 与 API Key。</li>
-          <li>插件本地生成的摘要结果、最近 10 条摘要缓存与调试日志。</li>
-        </ul>
+      <section class="sheet">
+        <header class="sheet-head">
+          <div class="sheet-label">Overview</div>
+          <h2>你最需要知道的几件事</h2>
+          <p>
+            本说明适用于浏览器扩展“PageBrief”。它的单一用途，是在用户主动点击后，对当前网页生成摘要。下面说明插件会处理什么、何时发送数据、数据保存在什么地方，以及用户如何控制这些数据。
+          </p>
+        </header>
 
-        <h2>2. 数据在什么情况下会发送出去</h2>
-        <ul>
-          <li>只有当用户主动点击“总结当前页”时，插件才会把网页内容发送到用户选择的模型服务。</li>
-          <li>插件不会把网页内容发送给本扩展开发者自己的服务器；当前版本不包含开发者中转后端。</li>
-          <li>如果用户选择的是第三方模型服务，例如 OpenAI、DeepSeek、OpenRouter 或 SiliconFlow，则数据会直接发送到对应服务提供方。</li>
-          <li>如果用户选择的是本地模型接口，例如 Ollama、LM Studio 或其他本机 OpenAI 兼容服务，则数据只会发送到本地地址。</li>
-        </ul>
+        <article class="policy-section">
+          <div class="policy-index">
+            <div class="policy-number">01</div>
+            <div class="policy-topic">Data</div>
+          </div>
+          <div class="policy-body">
+            <h3>插件会处理哪些数据</h3>
+            <ul>
+              <li>当前网页的标题、URL、描述、正文片段，或用户当前选中的文本。</li>
+              <li>用户填写的模型配置，包括模型服务模板、API URL、Model ID 与 API Key。</li>
+              <li>插件本地生成的摘要结果、最近 10 条摘要缓存与调试日志。</li>
+            </ul>
+          </div>
+        </article>
 
-        <h2>3. 数据会存在哪里</h2>
-        <ul>
-          <li>最近摘要与调试日志保存在当前浏览器的本地扩展存储中。</li>
-          <li>模型配置仅会在用户点击保存配置后写入当前浏览器本地，以便下次继续使用。</li>
-          <li>开发者不会自动接收这些本地存储内容。</li>
-        </ul>
+        <article class="policy-section">
+          <div class="policy-index">
+            <div class="policy-number">02</div>
+            <div class="policy-topic">Sharing</div>
+          </div>
+          <div class="policy-body">
+            <h3>数据会在什么时候发送出去</h3>
+            <ul>
+              <li>只有当用户主动点击“总结当前页”时，插件才会把网页内容发送到用户选择的模型服务。</li>
+              <li>插件不会把网页内容发送给本扩展开发者自己的服务器；当前版本不包含开发者中转后端。</li>
+              <li>如果用户选择的是第三方模型服务，例如 OpenAI、DeepSeek、OpenRouter、SiliconFlow 或其他兼容服务，数据会直接发送到对应服务提供方。</li>
+              <li>如果用户选择的是本地模型接口，例如 Ollama、LM Studio 或其他本机 OpenAI 兼容服务，数据只会发送到本地地址。</li>
+              <li>本扩展不会出售用户数据，也不会将用户数据用于广告定向。</li>
+            </ul>
+          </div>
+        </article>
 
-        <h2>4. 数据用途</h2>
-        <ul>
-          <li>读取当前网页内容，仅用于生成摘要。</li>
-          <li>保存模型配置，仅用于减少重复输入。</li>
-          <li>保存最近摘要与调试日志，仅用于提升使用体验与排查错误。</li>
-        </ul>
+        <article class="policy-section">
+          <div class="policy-index">
+            <div class="policy-number">03</div>
+            <div class="policy-topic">Storage</div>
+          </div>
+          <div class="policy-body">
+            <h3>数据保存在什么地方，以及用来做什么</h3>
+            <ul>
+              <li>最近摘要与调试日志保存在当前浏览器的本地扩展存储中。</li>
+              <li>模型配置仅会在用户点击保存配置后写入当前浏览器本地，以便下次继续使用。</li>
+              <li>读取当前网页内容，仅用于生成摘要。</li>
+              <li>保存模型配置，仅用于减少重复输入；保存最近摘要与调试日志，仅用于提升使用体验与排查错误。</li>
+              <li>开发者不会自动接收这些本地存储内容。</li>
+            </ul>
+          </div>
+        </article>
 
-        <h2>5. 数据共享</h2>
-        <ul>
-          <li>本扩展不会出售用户数据。</li>
-          <li>本扩展不会将用户数据用于广告定向。</li>
-          <li>本扩展仅会在用户主动操作时，将当前网页内容发送给用户自己选择的模型服务提供方。</li>
-        </ul>
+        <article class="policy-section">
+          <div class="policy-index">
+            <div class="policy-number">04</div>
+            <div class="policy-topic">Control</div>
+          </div>
+          <div class="policy-body">
+            <h3>用户可以如何管理这些数据</h3>
+            <ul>
+              <li>用户可以不填写 API Key，仅使用本地模型接口。</li>
+              <li>用户可以修改或清空本地保存的模型配置。</li>
+              <li>用户可以在插件界面中清空本地调试日志。</li>
+              <li>用户可以卸载扩展，以移除浏览器本地扩展存储中的相关数据。</li>
+            </ul>
+          </div>
+        </article>
 
-        <h2>6. 用户可以如何控制数据</h2>
-        <ul>
-          <li>用户可以不填写 API Key，仅使用本地模型接口。</li>
-          <li>用户可以修改或清空本地保存的模型配置。</li>
-          <li>用户可以在插件界面中清空本地调试日志。</li>
-          <li>用户可以卸载扩展，以移除浏览器本地扩展存储中的相关数据。</li>
-        </ul>
+        <footer class="footer">
+          <div class="footer-card">
+            <div class="footer-title">联系方式</div>
+            <div class="footer-value">
+              电子邮箱：
+              <a href="mailto:wyclemon@foxmail.com">wyclemon@foxmail.com</a>
+              <br>
+              官方网站：
+              <a href="https://lemonsstyle.github.io/PageBrief/" target="_blank" rel="noreferrer">
+                https://lemonsstyle.github.io/PageBrief/
+              </a>
+            </div>
+          </div>
 
-        <h2>7. 联系方式</h2>
-        <p>
-          联系邮箱：<code>wyclemon@foxmail.com</code><br>
-          官方网站：<code>https://lemonsstyle.github.io/PageBrief/</code>
-        </p>
-
-        <h2>8. 生效日期</h2>
-        <p><code>2026-04-20</code></p>
+          <div class="footer-card footer-date">
+            <div class="footer-title">生效日期</div>
+            <div class="footer-value">2026-04-20</div>
+          </div>
+        </footer>
       </section>
     </main>
   </body>
