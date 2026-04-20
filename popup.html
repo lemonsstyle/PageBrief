@@ -25,22 +25,49 @@
               class="icon-button"
               type="button"
               aria-label="打开工具面板"
-              title="工具"
+              title="打开工具面板"
             >
               &#9881;
             </button>
 
             <section id="utilityPanel" class="utility-panel" aria-hidden="true">
+              <div class="utility-row">
+                <span class="utility-label" data-i18n="languageLabel">界面语言</span>
+                <div
+                  id="localeSwitch"
+                  class="locale-switch"
+                  role="group"
+                  aria-label="界面语言"
+                >
+                  <button
+                    id="localeZhButton"
+                    class="locale-button is-active"
+                    type="button"
+                    data-locale="zh"
+                  >
+                    中文
+                  </button>
+                  <button
+                    id="localeEnButton"
+                    class="locale-button"
+                    type="button"
+                    data-locale="en"
+                  >
+                    EN
+                  </button>
+                </div>
+              </div>
+
               <label class="field">
                 <div class="range-head">
-                  <span>目标长度</span>
+                  <span data-i18n="targetLength">目标长度</span>
                   <strong id="summaryLimitValue">60 字</strong>
                 </div>
                 <input id="summaryLimit" type="range" min="60" max="150" step="10" value="60">
               </label>
 
               <div class="utility-head">
-                <h2>调试日志</h2>
+                <h2 data-i18n="debugLogs">调试日志</h2>
                 <div class="utility-actions">
                   <button id="copyLogsButton" class="ghost-button" type="button">复制日志</button>
                   <button
@@ -67,7 +94,7 @@
 
       <section class="panel summary-panel">
         <div class="section-head">
-          <h2>摘要</h2>
+          <h2 data-i18n="summaryTitle">摘要</h2>
           <button id="copySummaryButton" class="ghost-button" type="button" disabled>复制</button>
         </div>
         <div id="summary" class="summary empty">点击“总结当前页”生成结果。</div>
@@ -84,7 +111,7 @@
           aria-expanded="false"
         >
           <span class="config-text">
-            <span class="config-label">模型配置</span>
+            <span class="config-label" data-i18n="modelConfig">模型配置</span>
             <span id="configSummary" class="config-summary">OpenAI · gpt-4.1-mini</span>
           </span>
           <span id="settingsChevron" class="chevron" aria-hidden="true">&#8964;</span>
@@ -92,7 +119,7 @@
 
         <div id="settingsBody" class="panel-body">
           <label class="field">
-            <span>模板</span>
+            <span data-i18n="presetLabel">模板</span>
             <select id="preset">
               <option value="openai">OpenAI</option>
               <option value="deepseek">DeepSeek</option>
@@ -104,17 +131,23 @@
           </label>
 
           <label class="field">
-            <span>API URL</span>
+            <span data-i18n="apiUrlLabel">API URL</span>
             <input id="apiUrl" type="url" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false">
           </label>
 
           <label class="field">
-            <span>Model ID</span>
-            <input id="model" type="text" placeholder="例如：gpt-4.1-mini" spellcheck="false">
+            <span data-i18n="modelIdLabel">Model ID</span>
+            <input
+              id="model"
+              type="text"
+              placeholder="例如：gpt-4.1-mini"
+              data-i18n-placeholder="modelPlaceholder"
+              spellcheck="false"
+            >
           </label>
 
           <label class="field">
-            <span>API Key</span>
+            <span data-i18n="apiKeyLabel">API Key</span>
             <input id="apiKey" type="password" placeholder="sk-..." spellcheck="false">
           </label>
 
