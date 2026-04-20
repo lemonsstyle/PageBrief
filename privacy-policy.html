@@ -54,6 +54,10 @@
         margin: 0;
       }
 
+      [data-lang][hidden] {
+        display: none !important;
+      }
+
       main {
         max-width: 920px;
         margin: 0 auto;
@@ -84,6 +88,18 @@
         pointer-events: none;
       }
 
+      .hero-bar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .hero-copy {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
       .eyebrow {
         display: inline-flex;
         align-items: center;
@@ -96,6 +112,50 @@
         font-size: 13px;
         font-weight: 700;
         letter-spacing: 0.01em;
+      }
+
+      .lang-toggle {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex: 0 0 auto;
+        padding: 4px;
+        border: 1px solid rgba(95, 74, 54, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.74);
+        box-shadow: 0 10px 28px rgba(74, 49, 34, 0.06);
+      }
+
+      .lang-button {
+        min-width: 74px;
+        min-height: 34px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .lang-button:hover {
+        color: var(--text);
+      }
+
+      .lang-button:focus-visible {
+        outline: 2px solid rgba(181, 77, 47, 0.26);
+        outline-offset: 2px;
+      }
+
+      .lang-button.is-active {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #fff9f5;
+        box-shadow: 0 10px 20px rgba(143, 58, 36, 0.16);
       }
 
       h1 {
@@ -295,6 +355,15 @@
           padding: 24px 18px 22px;
         }
 
+        .hero-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .lang-toggle {
+          align-self: flex-start;
+        }
+
         .lead {
           font-size: 17px;
         }
@@ -340,24 +409,51 @@
   <body>
     <main>
       <section class="hero">
-        <div class="eyebrow">Privacy Policy</div>
-        <h1>PageBrief 隐私说明</h1>
-        <p class="lead">
-          PageBrief 只在用户主动点击“总结当前页”后处理当前网页内容，用来生成一段简短摘要。我们尽量少处理、少存储、少打扰，并把控制权留给用户。
-        </p>
-        <div class="summary">
+        <div class="hero-bar">
+          <div class="hero-copy">
+            <div class="eyebrow">Privacy Policy</div>
+            <h1 data-lang="zh">PageBrief 隐私说明</h1>
+            <h1 data-lang="en" hidden>PageBrief Privacy Policy</h1>
+            <p class="lead" data-lang="zh">
+              PageBrief 只在用户主动点击“总结当前页”后处理当前网页内容，用来生成一段简短摘要。我们尽量少处理、少存储、少打扰，并把控制权留给用户。
+            </p>
+            <p class="lead" data-lang="en" hidden>
+              PageBrief only processes page content after the user explicitly chooses to summarize the current page. It is designed to handle as little data as possible, store as little as possible, and keep control with the user.
+            </p>
+          </div>
+
+          <div class="lang-toggle" role="group" aria-label="Language switch">
+            <button class="lang-button is-active" type="button" data-lang-button="zh" aria-pressed="true">
+              中文
+            </button>
+            <button class="lang-button" type="button" data-lang-button="en" aria-pressed="false">
+              English
+            </button>
+          </div>
+        </div>
+
+        <div class="summary" data-lang="zh">
           <span class="summary-pill">仅在用户主动操作后处理网页内容</span>
           <span class="summary-pill">不经过开发者自有服务器</span>
           <span class="summary-pill">配置仅在手动保存后写入本地</span>
+        </div>
+        <div class="summary" data-lang="en" hidden>
+          <span class="summary-pill">Only processes page content after an explicit action</span>
+          <span class="summary-pill">No developer-owned relay server</span>
+          <span class="summary-pill">Settings are stored locally only after save</span>
         </div>
       </section>
 
       <section class="sheet">
         <header class="sheet-head">
           <div class="sheet-label">Overview</div>
-          <h2>你最需要知道的几件事</h2>
-          <p>
+          <h2 data-lang="zh">你最需要知道的几件事</h2>
+          <h2 data-lang="en" hidden>The essentials</h2>
+          <p data-lang="zh">
             本说明适用于浏览器扩展“PageBrief”。它的单一用途，是在用户主动点击后，对当前网页生成摘要。下面说明插件会处理什么、何时发送数据、数据保存在什么地方，以及用户如何控制这些数据。
+          </p>
+          <p data-lang="en" hidden>
+            This policy applies to the PageBrief browser extension. Its single purpose is to generate a short summary for the current page after the user explicitly asks for it. The sections below explain what data is handled, when it is sent, where it is stored, and how users can control it.
           </p>
         </header>
 
@@ -367,11 +463,17 @@
             <div class="policy-topic">Data</div>
           </div>
           <div class="policy-body">
-            <h3>插件会处理哪些数据</h3>
-            <ul>
+            <h3 data-lang="zh">插件会处理哪些数据</h3>
+            <h3 data-lang="en" hidden>What data the extension handles</h3>
+            <ul data-lang="zh">
               <li>当前网页的标题、URL、描述、正文片段，或用户当前选中的文本。</li>
               <li>用户填写的模型配置，包括模型服务模板、API URL、Model ID 与 API Key。</li>
               <li>插件本地生成的摘要结果、最近 10 条摘要缓存与调试日志。</li>
+            </ul>
+            <ul data-lang="en" hidden>
+              <li>The current page title, URL, description, body excerpt, or the text currently selected by the user.</li>
+              <li>Model settings entered by the user, including the service preset, API URL, Model ID, and API Key.</li>
+              <li>Locally generated summaries, up to 10 recent summary cache entries, and debug logs.</li>
             </ul>
           </div>
         </article>
@@ -382,13 +484,21 @@
             <div class="policy-topic">Sharing</div>
           </div>
           <div class="policy-body">
-            <h3>数据会在什么时候发送出去</h3>
-            <ul>
+            <h3 data-lang="zh">数据会在什么时候发送出去</h3>
+            <h3 data-lang="en" hidden>When data is sent</h3>
+            <ul data-lang="zh">
               <li>只有当用户主动点击“总结当前页”时，插件才会把网页内容发送到用户选择的模型服务。</li>
               <li>插件不会把网页内容发送给本扩展开发者自己的服务器；当前版本不包含开发者中转后端。</li>
               <li>如果用户选择的是第三方模型服务，例如 OpenAI、DeepSeek、OpenRouter、SiliconFlow 或其他兼容服务，数据会直接发送到对应服务提供方。</li>
               <li>如果用户选择的是本地模型接口，例如 Ollama、LM Studio 或其他本机 OpenAI 兼容服务，数据只会发送到本地地址。</li>
               <li>本扩展不会出售用户数据，也不会将用户数据用于广告定向。</li>
+            </ul>
+            <ul data-lang="en" hidden>
+              <li>Page content is sent only when the user explicitly clicks to summarize the current page.</li>
+              <li>The extension does not send page content to any server operated by the developer; the current version has no developer relay backend.</li>
+              <li>If the user chooses a third-party model service, such as OpenAI, DeepSeek, OpenRouter, SiliconFlow, or another compatible provider, the data is sent directly to that provider.</li>
+              <li>If the user chooses a local model endpoint, such as Ollama, LM Studio, or another local OpenAI-compatible service, the data stays on the local address.</li>
+              <li>The extension does not sell user data and does not use user data for advertising or profiling.</li>
             </ul>
           </div>
         </article>
@@ -399,13 +509,21 @@
             <div class="policy-topic">Storage</div>
           </div>
           <div class="policy-body">
-            <h3>数据保存在什么地方，以及用来做什么</h3>
-            <ul>
+            <h3 data-lang="zh">数据保存在什么地方，以及用来做什么</h3>
+            <h3 data-lang="en" hidden>Where data is stored and what it is used for</h3>
+            <ul data-lang="zh">
               <li>最近摘要与调试日志保存在当前浏览器的本地扩展存储中。</li>
               <li>模型配置仅会在用户点击保存配置后写入当前浏览器本地，以便下次继续使用。</li>
               <li>读取当前网页内容，仅用于生成摘要。</li>
               <li>保存模型配置，仅用于减少重复输入；保存最近摘要与调试日志，仅用于提升使用体验与排查错误。</li>
               <li>开发者不会自动接收这些本地存储内容。</li>
+            </ul>
+            <ul data-lang="en" hidden>
+              <li>Recent summaries and debug logs are stored in the browser's local extension storage.</li>
+              <li>Model settings are written locally only after the user clicks Save Configuration, so they can be reused later.</li>
+              <li>Page content is read only for the purpose of generating a summary.</li>
+              <li>Model settings reduce repeated input, while recent summaries and debug logs improve usability and troubleshooting.</li>
+              <li>The developer does not automatically receive any of this locally stored information.</li>
             </ul>
           </div>
         </article>
@@ -416,20 +534,28 @@
             <div class="policy-topic">Control</div>
           </div>
           <div class="policy-body">
-            <h3>用户可以如何管理这些数据</h3>
-            <ul>
+            <h3 data-lang="zh">用户可以如何管理这些数据</h3>
+            <h3 data-lang="en" hidden>How users can manage this data</h3>
+            <ul data-lang="zh">
               <li>用户可以不填写 API Key，仅使用本地模型接口。</li>
               <li>用户可以修改或清空本地保存的模型配置。</li>
               <li>用户可以在插件界面中清空本地调试日志。</li>
               <li>用户可以卸载扩展，以移除浏览器本地扩展存储中的相关数据。</li>
+            </ul>
+            <ul data-lang="en" hidden>
+              <li>Users may leave the API Key blank when using a local model endpoint.</li>
+              <li>Users can edit or clear locally saved model settings.</li>
+              <li>Users can clear local debug logs from the extension interface.</li>
+              <li>Users can uninstall the extension to remove locally stored extension data.</li>
             </ul>
           </div>
         </article>
 
         <footer class="footer">
           <div class="footer-card">
-            <div class="footer-title">联系方式</div>
-            <div class="footer-value">
+            <div class="footer-title" data-lang="zh">联系方式</div>
+            <div class="footer-title" data-lang="en" hidden>Contact</div>
+            <div class="footer-value" data-lang="zh">
               电子邮箱：
               <a href="mailto:wyclemon@foxmail.com">wyclemon@foxmail.com</a>
               <br>
@@ -438,14 +564,85 @@
                 https://lemonsstyle.github.io/PageBrief/
               </a>
             </div>
+            <div class="footer-value" data-lang="en" hidden>
+              Email:
+              <a href="mailto:wyclemon@foxmail.com">wyclemon@foxmail.com</a>
+              <br>
+              Website:
+              <a href="https://lemonsstyle.github.io/PageBrief/" target="_blank" rel="noreferrer">
+                https://lemonsstyle.github.io/PageBrief/
+              </a>
+            </div>
           </div>
 
           <div class="footer-card footer-date">
-            <div class="footer-title">生效日期</div>
+            <div class="footer-title" data-lang="zh">生效日期</div>
+            <div class="footer-title" data-lang="en" hidden>Effective Date</div>
             <div class="footer-value">2026-04-20</div>
           </div>
         </footer>
       </section>
     </main>
+
+    <script>
+      (() => {
+        const storageKey = "pagebriefPrivacyLanguage";
+        const titles = {
+          zh: "PageBrief 隐私说明",
+          en: "PageBrief Privacy Policy"
+        };
+        const buttons = Array.from(document.querySelectorAll("[data-lang-button]"));
+        const blocks = Array.from(document.querySelectorAll("[data-lang]"));
+
+        const readSavedLanguage = () => {
+          try {
+            return localStorage.getItem(storageKey) || "";
+          } catch {
+            return "";
+          }
+        };
+
+        const saveLanguage = (language) => {
+          try {
+            localStorage.setItem(storageKey, language);
+          } catch {}
+        };
+
+        const detectLanguage = () => {
+          const saved = readSavedLanguage();
+          if (saved === "zh" || saved === "en") {
+            return saved;
+          }
+
+          return navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+        };
+
+        const setLanguage = (language) => {
+          const nextLanguage = language === "en" ? "en" : "zh";
+          document.documentElement.lang = nextLanguage === "zh" ? "zh-CN" : "en";
+          document.title = titles[nextLanguage];
+
+          blocks.forEach((block) => {
+            block.hidden = block.dataset.lang !== nextLanguage;
+          });
+
+          buttons.forEach((button) => {
+            const isActive = button.dataset.langButton === nextLanguage;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+          });
+
+          saveLanguage(nextLanguage);
+        };
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            setLanguage(button.dataset.langButton);
+          });
+        });
+
+        setLanguage(detectLanguage());
+      })();
+    </script>
   </body>
 </html>
