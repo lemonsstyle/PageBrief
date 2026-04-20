@@ -3,6 +3,12 @@ const DEBUG_STORAGE_KEY = "pageSummaryAiDebugLog";
 const UI_STATE_STORAGE_KEY = "pageSummaryAiUiState";
 const SUMMARY_CACHE_STORAGE_KEY = "pageSummaryAiSummaryCache";
 const LOCALE_STORAGE_KEY = "pageBriefLocale";
+const SECURE_DB_NAME = "pageBriefSecureVault";
+const SECURE_DB_VERSION = 1;
+const SECURE_KEY_STORE = "keys";
+const API_KEY_RECORD_KEY = "apiKeyEncryptionKey";
+const API_KEY_ENCRYPTION_VERSION = 1;
+const API_KEY_IV_BYTES = 12;
 const DEFAULT_SUMMARY_LIMIT = 60;
 const MIN_SUMMARY_LIMIT = 60;
 const MAX_SUMMARY_LIMIT = 150;
@@ -128,6 +134,9 @@ const MESSAGES = {
     copyLogsFailed:
       "复制调试日志失败。你可以右键弹窗选择检查，在 Console 里看更完整日志。",
     clearLogsFailed: "清空调试日志失败。",
+    errorSecureStorageUnavailable: "无法安全保存 API Key，请稍后重试。",
+    errorEncryptedApiKeyUnavailable:
+      "之前保存的 API Key 暂时无法读取，请重新填写并保存。",
     errorMissingApiUrl: "请先填写 API URL。",
     errorMissingModel: "请先填写 Model ID。",
     errorMissingApiKey: "请先填写 API Key。",
@@ -208,6 +217,10 @@ const MESSAGES = {
     copyLogsFailed:
       "Couldn't copy the debug log. Open the popup inspector and check Console for details.",
     clearLogsFailed: "Couldn't clear the debug log.",
+    errorSecureStorageUnavailable:
+      "The API key couldn't be stored securely. Please try again.",
+    errorEncryptedApiKeyUnavailable:
+      "A previously saved API key can't be read right now. Please enter it again and save.",
     errorMissingApiUrl: "Enter an API URL first.",
     errorMissingModel: "Enter a Model ID first.",
     errorMissingApiKey: "Enter an API key first.",
@@ -296,7 +309,12 @@ let buttonFlashTimers = new WeakMap();
 let statusTimer = 0;
 let currentLocale = DEFAULT_LOCALE;
 let isBusy = false;
+let secureKeyPromise = null;
 let settingsState = createDefaultSettingsState();
+let settingsLoadState = {
+  lostEncryptedKey: false,
+  secureStorageError: false
+};
 let uiState = {
   settingsCollapsed: false,
   utilityOpen: false
@@ -306,6 +324,169 @@ let summaryState = {
   type: "placeholder",
   key: "summaryEmpty"
 };
+
+function hasOwnKey(target, key) {
+  return Object.prototype.hasOwnProperty.call(target || {}, key);
+}
+
+function bytesToBase64(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+
+  return btoa(binary);
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return bytes;
+}
+
+function createSecureStorageError(cause = null) {
+  return createUiError("secure_storage_unavailable", t("errorSecureStorageUnavailable"), {
+    causeName: cause?.name || ""
+  });
+}
+
+function isEncryptedApiKeyPayload(value) {
+  return (
+    value &&
+    typeof value === "object" &&
+    value.version === API_KEY_ENCRYPTION_VERSION &&
+    typeof value.iv === "string" &&
+    typeof value.ciphertext === "string"
+  );
+}
+
+function openSecureKeyDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(SECURE_DB_NAME, SECURE_DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(SECURE_KEY_STORE)) {
+        db.createObjectStore(SECURE_KEY_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("Failed to open secure storage."));
+  });
+}
+
+function readSecureStoreValue(db, key) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(SECURE_KEY_STORE, "readonly");
+    const store = transaction.objectStore(SECURE_KEY_STORE);
+    const request = store.get(key);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("Failed to read secure value."));
+  });
+}
+
+function writeSecureStoreValue(db, key, value) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(SECURE_KEY_STORE, "readwrite");
+    const store = transaction.objectStore(SECURE_KEY_STORE);
+    const request = store.put(value, key);
+
+    transaction.oncomplete = () => resolve(request.result);
+    transaction.onerror = () => reject(transaction.error || request.error || new Error("Failed to write secure value."));
+    transaction.onabort = () => reject(transaction.error || new Error("Secure write aborted."));
+  });
+}
+
+async function getApiKeyCryptoKey() {
+  if (!window.crypto?.subtle || !window.indexedDB) {
+    throw createSecureStorageError();
+  }
+
+  if (!secureKeyPromise) {
+    secureKeyPromise = (async () => {
+      const db = await openSecureKeyDb();
+
+      try {
+        const existingKey = await readSecureStoreValue(db, API_KEY_RECORD_KEY);
+        if (
+          existingKey instanceof CryptoKey ||
+          (existingKey && typeof existingKey === "object" && existingKey.type === "secret")
+        ) {
+          return existingKey;
+        }
+
+        const generatedKey = await window.crypto.subtle.generateKey(
+          {
+            name: "AES-GCM",
+            length: 256
+          },
+          false,
+          ["encrypt", "decrypt"]
+        );
+
+        await writeSecureStoreValue(db, API_KEY_RECORD_KEY, generatedKey);
+        return generatedKey;
+      } finally {
+        db.close();
+      }
+    })().catch((error) => {
+      secureKeyPromise = null;
+      throw createSecureStorageError(error);
+    });
+  }
+
+  return secureKeyPromise;
+}
+
+async function encryptApiKeyValue(apiKey) {
+  if (!apiKey) {
+    return null;
+  }
+
+  try {
+    const key = await getApiKeyCryptoKey();
+    const iv = window.crypto.getRandomValues(new Uint8Array(API_KEY_IV_BYTES));
+    const encoded = new TextEncoder().encode(apiKey);
+    const ciphertext = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv
+      },
+      key,
+      encoded
+    );
+
+    return {
+      version: API_KEY_ENCRYPTION_VERSION,
+      iv: bytesToBase64(iv),
+      ciphertext: bytesToBase64(new Uint8Array(ciphertext))
+    };
+  } catch (error) {
+    throw createSecureStorageError(error);
+  }
+}
+
+async function decryptApiKeyValue(payload) {
+  const key = await getApiKeyCryptoKey();
+  const decrypted = await window.crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: base64ToBytes(payload.iv)
+    },
+    key,
+    base64ToBytes(payload.ciphertext)
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
 
 function normalizeLocale(locale) {
   const normalized = String(locale || "").toLowerCase();
@@ -440,6 +621,11 @@ async function init() {
     resetSummaryState("summaryEmpty");
   }
   clearStatus();
+  if (settingsLoadState.lostEncryptedKey) {
+    setStatusKey("errorEncryptedApiKeyUnavailable", "error");
+  } else if (settingsLoadState.secureStorageError) {
+    setStatusKey("errorSecureStorageUnavailable", "error");
+  }
   elements.app.classList.add("is-ready");
 
   if (cachedSummary?.summary) {
@@ -483,7 +669,22 @@ function bindEvents() {
 
 async function loadSettings() {
   const { [STORAGE_KEY]: saved } = await chrome.storage.local.get(STORAGE_KEY);
-  settingsState = normalizeSettingsState(saved);
+
+  const decoded = await deserializeSettingsState(saved);
+  settingsState = decoded.state;
+  settingsLoadState = {
+    lostEncryptedKey: decoded.lostEncryptedKey,
+    secureStorageError: false
+  };
+
+  if (decoded.needsMigration) {
+    try {
+      await persistSettingsState();
+    } catch {
+      settingsLoadState.secureStorageError = true;
+    }
+  }
+
   return getActiveSettings(settingsState);
 }
 
@@ -562,12 +763,82 @@ function normalizeSettingsState(saved) {
   };
 }
 
+async function deserializeSettingsState(saved) {
+  const baseState = createDefaultSettingsState();
+  const selectedPreset = saved?.preset && PRESETS[saved.preset] ? saved.preset : "openai";
+  const profiles = { ...baseState.presets };
+  let needsMigration = false;
+  let lostEncryptedKey = false;
+
+  if (saved?.presets && typeof saved.presets === "object") {
+    for (const presetKey of Object.keys(PRESETS)) {
+      const decoded = await deserializePresetProfile(presetKey, saved.presets[presetKey]);
+      profiles[presetKey] = decoded.profile;
+      needsMigration = needsMigration || decoded.needsMigration;
+      lostEncryptedKey = lostEncryptedKey || decoded.lostEncryptedKey;
+    }
+  } else if (saved && typeof saved === "object") {
+    const decoded = await deserializePresetProfile(selectedPreset, saved);
+    profiles[selectedPreset] = decoded.profile;
+    needsMigration = decoded.needsMigration;
+    lostEncryptedKey = decoded.lostEncryptedKey;
+  }
+
+  return {
+    state: {
+      preset: selectedPreset,
+      summaryLimit: normalizeSummaryLimit(saved?.summaryLimit),
+      presets: profiles
+    },
+    needsMigration,
+    lostEncryptedKey
+  };
+}
+
 function normalizePresetProfile(presetKey, profile) {
   const defaults = createDefaultPresetProfile(presetKey);
   return {
     apiUrl: typeof profile?.apiUrl === "string" ? profile.apiUrl : defaults.apiUrl,
     model: typeof profile?.model === "string" ? profile.model : defaults.model,
     apiKey: typeof profile?.apiKey === "string" ? profile.apiKey : defaults.apiKey
+  };
+}
+
+async function deserializePresetProfile(presetKey, profile) {
+  const normalized = normalizePresetProfile(presetKey, profile);
+  const hasPlainApiKey = hasOwnKey(profile, "apiKey");
+
+  if (hasPlainApiKey) {
+    return {
+      profile: normalized,
+      needsMigration: true,
+      lostEncryptedKey: false
+    };
+  }
+
+  if (isEncryptedApiKeyPayload(profile?.apiKeyEncrypted)) {
+    try {
+      return {
+        profile: {
+          ...normalized,
+          apiKey: await decryptApiKeyValue(profile.apiKeyEncrypted)
+        },
+        needsMigration: false,
+        lostEncryptedKey: false
+      };
+    } catch {
+      return {
+        profile: normalized,
+        needsMigration: false,
+        lostEncryptedKey: true
+      };
+    }
+  }
+
+  return {
+    profile: normalized,
+    needsMigration: false,
+    lostEncryptedKey: hasOwnKey(profile, "apiKeyEncrypted") && Boolean(profile?.apiKeyEncrypted)
   };
 }
 
@@ -601,7 +872,34 @@ function mergeSettingsIntoState(state, settings) {
 }
 
 async function persistSettingsState() {
-  await chrome.storage.local.set({ [STORAGE_KEY]: settingsState });
+  await chrome.storage.local.set({
+    [STORAGE_KEY]: await serializeSettingsState(settingsState)
+  });
+}
+
+async function serializeSettingsState(state) {
+  const resolvedState = normalizeSettingsState(state);
+  const profiles = {};
+
+  for (const presetKey of Object.keys(PRESETS)) {
+    profiles[presetKey] = await serializePresetProfile(presetKey, resolvedState.presets[presetKey]);
+  }
+
+  return {
+    preset: resolvedState.preset,
+    summaryLimit: resolvedState.summaryLimit,
+    presets: profiles
+  };
+}
+
+async function serializePresetProfile(presetKey, profile) {
+  const normalized = normalizePresetProfile(presetKey, profile);
+
+  return {
+    apiUrl: normalized.apiUrl,
+    model: normalized.model,
+    apiKeyEncrypted: await encryptApiKeyValue(normalized.apiKey)
+  };
 }
 
 function hydrateForm(settings) {
@@ -1568,6 +1866,8 @@ function resolveErrorHintKey(error) {
   }
 
   switch (error.code) {
+    case "secure_storage_unavailable":
+      return "errorSecureStorageUnavailable";
     case "missing_api_url":
       return "errorMissingApiUrl";
     case "missing_model":
@@ -1592,6 +1892,8 @@ function resolveErrorHintKey(error) {
       return "errorRequestNetwork";
     case "empty_model_output":
       return "errorEmptyModelOutput";
+    case "encrypted_api_key_unavailable":
+      return "errorEncryptedApiKeyUnavailable";
     case "api_response_error":
       return resolveApiStatusHintKey(error.status);
     default:
