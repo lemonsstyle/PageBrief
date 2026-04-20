@@ -454,13 +454,14 @@ button:disabled {
 .config-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   margin-top: 6px;
 }
 
 .secondary {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  min-width: 132px;
   padding: 11px 14px;
   border-radius: 16px;
   background: rgba(239, 228, 217, 0.92);
@@ -471,6 +472,7 @@ button:disabled {
 
 .config-link {
   flex: 0 0 auto;
+  margin-right: auto;
   color: var(--accent-strong);
   font-size: 12px;
   font-weight: 700;
